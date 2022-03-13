@@ -23,8 +23,8 @@ namespace WinstonBot.Commands.Config
             public double Base { get; set; } = 0f;
             [CommandOption("chin", "Weight for the chin role (0-1)", required: false)]
             public double Chin { get; set; } = 0f;
-            [CommandOption("hammer", "Weight for the hammer role (0-1)", required: false)]
-            public double Hammer { get; set; } = 0f;
+            [CommandOption("freedps", "Weight for the free dps role (0-1)", required: false)]
+            public double FreeDPS { get; set; } = 0f;
             [CommandOption("u", "Weight for the u role (0-1)", required: false)]
             public double U { get; set; } = 0f;
             [CommandOption("g", "Weight for the g role (0-1)", required: false)]
@@ -38,7 +38,7 @@ namespace WinstonBot.Commands.Config
 
             public async override Task HandleCommand(CommandContext context)
             {
-                double[] weights = new double[] { Base, Chin, Hammer, U, G, C, F };
+                double[] weights = new double[] { Base, Chin, FreeDPS, U, G, C, F };
                 weights = weights.Select(x => Math.Clamp(x, 0f, 1f)).ToArray();
                 if (weights.Sum() == 0f)
                 {
@@ -74,8 +74,8 @@ namespace WinstonBot.Commands.Config
             public double Base { get; set; } = 0f;
             [CommandOption("chin", "Weight for the chin role (0-1)", required: false)]
             public double Chin { get; set; } = 0f;
-            [CommandOption("hammer", "Weight for the hammer role (0-1)", required: false)]
-            public double Hammer { get; set; } = 0f;
+            [CommandOption("freedps", "Weight for the free dps role (0-1)", required: false)]
+            public double FreeDPS { get; set; } = 0f;
             [CommandOption("u", "Weight for the u role (0-1)", required: false)]
             public double U { get; set; } = 0f;
             [CommandOption("g", "Weight for the g role (0-1)", required: false)]
@@ -91,7 +91,7 @@ namespace WinstonBot.Commands.Config
             {
                 var db = context.ServiceProvider.GetRequiredService<AoDDatabase>();
 
-                double[] weights = new double[] { Base, Chin, Hammer, U, G, C, F };
+                double[] weights = new double[] { Base, Chin, FreeDPS, U, G, C, F };
                 weights = weights.Select(x => Math.Clamp(x, 0f, 1f)).ToArray();
                 if (weights.Sum() == 0f)
                 {
@@ -192,7 +192,7 @@ namespace WinstonBot.Commands.Config
                     $"\nWeights: " +
                     $"**Base**: {entry.GetRoleWeight(AoDDatabase.Roles.Base)}, " +
                     $"**Chin**: {entry.GetRoleWeight(AoDDatabase.Roles.Chinner)}, " +
-                    $"**Hammer**: {entry.GetRoleWeight(AoDDatabase.Roles.Hammer)}, " +
+                    $"**Free DPS**: {entry.GetRoleWeight(AoDDatabase.Roles.FreeDPS)}, " +
                     $"**U**: {entry.GetRoleWeight(AoDDatabase.Roles.Umbra)}, " +
                     $"**G**: {entry.GetRoleWeight(AoDDatabase.Roles.Glacies)}, " +
                     $"**C**: {entry.GetRoleWeight(AoDDatabase.Roles.Cruor)}, " +

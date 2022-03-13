@@ -8,30 +8,86 @@ using Google.Apis.Util.Store;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using System.Collections.Immutable;
+using WinstonBot.Extensions;
+using System.ComponentModel;
+using System.Collections.Concurrent;
+using System.Reflection;
+using static WinstonBot.Services.AoDDatabase;
 
 namespace WinstonBot.Services
 {
+    public static class Extensions
+    {
+        // Note that we never need to expire these cache items, so we just use ConcurrentDictionary rather than MemoryCache
+        private static readonly ConcurrentDictionary<string, string> DisplayNameCache = new ConcurrentDictionary<string, string>();
+
+        public static string DisplayName(this Roles value)
+        {
+            var key = $"{value.GetType().FullName}.{value}";
+
+            var displayName = DisplayNameCache.GetOrAdd(key, x =>
+            {
+                var name = (DescriptionAttribute[])value
+                    .GetType()
+                    .GetTypeInfo()
+                    .GetField(value.ToString())
+                    .GetCustomAttributes(typeof(DescriptionAttribute), false);
+
+                return name.Length > 0 ? name[0].Description : value.ToString();
+            });
+
+            return displayName;
+        }
+    }
+
     public class AoDDatabase
     {
+       
         public enum Roles
         {
+            [Description("Base")]
             Base,
+            [Description("Chinner")]
             Chinner,
-            Hammer,
+            [Description("Free DPS")]
+            FreeDPS,
+            [Description("Umbra")]
             Umbra,
+            [Description("Glacies")]
             Glacies,
+            [Description("Cruor")]
             Cruor,
+            [Description("Fumus")]
             Fumus
+
         }
+
+        //public class Roles : Enumeration
+        //{
+        //    public static Roles Base = new(1, nameof(Base));
+        //    public static Roles Chinner = new(2, nameof(Chinner));
+        //    public static Roles FreeDPS = new(3, "Free DPS");
+        //    public static Roles Umbra = new(4, nameof(Umbra));
+        //    public static Roles Glacies = new(5, nameof(Glacies));
+        //    public static Roles Cruor = new(6, nameof(Cruor));
+        //    public static Roles Fumus = new(7, nameof(Fumus));
+
+        //    public Roles(int id, string name) : base(id, name)
+        //    {
+        //    }
+        //}
 
         public static readonly Roles[] ExperiencedRoles = new[]
         {
             Roles.Base,
             Roles.Chinner,
-            Roles.Hammer,
+            Roles.FreeDPS,
             Roles.Umbra,
             Roles.Glacies // ?
         };
+
+
+
 
         public enum ExperienceType
         {
@@ -219,7 +275,7 @@ namespace WinstonBot.Services
             ValueRange requestBody = new();
             requestBody.Values = new List<IList<object>>() { MakeUserRow(user) };
 
-            SpreadsheetsResource.ValuesResource.AppendRequest request = 
+            SpreadsheetsResource.ValuesResource.AppendRequest request =
                 _sheetsService.Spreadsheets.Values.Append(requestBody, spreadsheetId, UserDBRange);
             request.ValueInputOption = SpreadsheetsResource.ValuesResource.AppendRequest.ValueInputOptionEnum.RAW;
             request.InsertDataOption = SpreadsheetsResource.ValuesResource.AppendRequest.InsertDataOptionEnum.INSERTROWS;
